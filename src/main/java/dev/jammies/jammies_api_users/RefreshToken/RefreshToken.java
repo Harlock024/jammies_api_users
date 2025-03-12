@@ -1,17 +1,13 @@
 package dev.jammies.jammies_api_users.RefreshToken;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.jammies.jammies_api_users.users.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
-
 
 @Getter
 @Setter

@@ -2,9 +2,7 @@ package dev.jammies.jammies_api_users.utils;
 
 import dev.jammies.jammies_api_users.RefreshToken.TokensResponse;
 import dev.jammies.jammies_api_users.users.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -18,39 +16,55 @@ public class Jwt {
     private static final long ACCESS_EXPIRATION = 86400000;
     private static final long REFRESH_EXPIRATION = 1209600000;
 
-    public  TokensResponse generateTokens(User user, String jti) {
+    public TokensResponse generateTokens(User user, String jti) {
         String accessToken = generateAccessToken(user);
-        String refreshToken = generateRefreshToken(user,jti);
+        String refreshToken = generateRefreshToken(user, jti);
         Boolean isAuthenticated = true;
-        return new TokensResponse(accessToken, refreshToken,isAuthenticated);
+        return new TokensResponse(accessToken, refreshToken, isAuthenticated);
     }
 
     public static String generateAccessToken(User user) {
-        SecretKey key = Keys.hmacShaKeyFor(ACCESS_SECRET.getBytes());
+
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+ACCESS_EXPIRATION))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION))
+                .signWith(Keys.hmacShaKeyFor(ACCESS_SECRET.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    public static String generateRefreshToken(User user,String jti) {
-        SecretKey key = Keys.hmacShaKeyFor(REFRESH_SECRET.getBytes());
+    public static String generateRefreshToken(User user, String jti) {
+
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("jti", jti)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+REFRESH_EXPIRATION))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION))
+                .signWith(Keys.hmacShaKeyFor(REFRESH_SECRET.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
     }
+
     public Claims validateToken(String token) {
-        SecretKey key = Keys.hmacShaKeyFor(ACCESS_SECRET.getBytes());
         return Jwts.parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(Keys.hmacShaKeyFor(ACCESS_SECRET.getBytes()))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public boolean validateAccessToken(String token) {
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(ACCESS_SECRET.getBytes()))
+                    .build()
+                    .parseClaimsJws(token);
+            Date expiration = claims.getBody().getExpiration();
+            if (expiration.before(new Date())) {
+                throw new JwtException("token has expired");
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

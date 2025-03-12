@@ -1,5 +1,6 @@
 package dev.jammies.jammies_api_users.auth;
 
+import dev.jammies.jammies_api_users.RefreshToken.RefreshToken;
 import dev.jammies.jammies_api_users.RefreshToken.RefreshTokenServices;
 import dev.jammies.jammies_api_users.RefreshToken.TokensResponse;
 import dev.jammies.jammies_api_users.users.UsersRepository;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -23,6 +25,7 @@ public class AuthServices {
 
     private final RefreshTokenServices refreshTokenServices;
     private final Jwt jwt;
+
 
     public AuthServices(UsersRepository usersRepository, PasswordEncoder passwordEncoder , RefreshTokenServices refreshTokenServices, Jwt jwt) {
         this.usersRepository = usersRepository;
