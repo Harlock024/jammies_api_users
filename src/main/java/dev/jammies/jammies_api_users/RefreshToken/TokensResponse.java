@@ -15,6 +15,5 @@ public class TokensResponse {
     public TokensResponse(String accessToken, String refreshToken, Boolean isAuthenticated) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.isAuthenticated = isAuthenticated;
     }
 }

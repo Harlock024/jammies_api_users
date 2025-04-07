@@ -8,7 +8,5 @@ public class JammiesApiUsersApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(JammiesApiUsersApplication.class, args);
-        
     }
-
 }

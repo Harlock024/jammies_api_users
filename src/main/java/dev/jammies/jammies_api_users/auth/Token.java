@@ -27,5 +27,4 @@ public class Token implements Serializable {
     @JsonIgnore
     @ManyToOne
     private User user;
-
 }
