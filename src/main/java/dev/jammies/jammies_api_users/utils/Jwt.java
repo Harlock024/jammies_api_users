@@ -34,7 +34,6 @@ public class Jwt {
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
-
     public static String generateRefreshToken(User user,String jti) {
         SecretKey key = Keys.hmacShaKeyFor(REFRESH_SECRET.getBytes());
         return Jwts.builder()

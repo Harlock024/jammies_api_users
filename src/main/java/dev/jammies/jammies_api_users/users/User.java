@@ -38,6 +38,15 @@ public class User implements UserDetails, Serializable {
     private String password;
 
 
+
+
+    @Column(nullable = true)
+    private String profile_picture;
+
+    @Column(nullable = true)
+    private String bio;
+
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;

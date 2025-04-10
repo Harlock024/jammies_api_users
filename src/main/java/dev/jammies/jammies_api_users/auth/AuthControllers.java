@@ -23,10 +23,9 @@ public class AuthControllers {
         AuthResponse auth= authServices.signup(newUser);
         return new ResponseEntity<>(auth, HttpStatus.CREATED);
     }
-
     @CrossOrigin(origins =  "http://localhost:4321")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> loin(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginDTO loginDTO) {
         AuthResponse auth =  authServices.login(loginDTO);
         return new ResponseEntity<>(auth,HttpStatus.OK);
     }
