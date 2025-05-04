@@ -25,8 +25,10 @@ public class User implements UserDetails, Serializable {
     @Column(nullable = false)
     private UUID id;
 
-
-    @Column(nullable = false)
+    @Column(nullable = true)
+    private String name;
+    
+    @Column(nullable = false, unique = true)
     private String username;
 
 
@@ -36,6 +38,15 @@ public class User implements UserDetails, Serializable {
 
     @Column(nullable = false)
     private String password;
+
+
+
+
+    @Column(nullable = true)
+    private String profile_picture;
+
+    @Column(nullable = true)
+    private String bio;
 
 
     @CreationTimestamp

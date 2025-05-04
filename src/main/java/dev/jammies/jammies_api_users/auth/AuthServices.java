@@ -34,29 +34,36 @@ public class AuthServices {
         this.jwt = jwt;
     }
 
-    public User signup(@NotNull UserDTO newUser) {
+    public AuthResponse signup(@NotNull UserDTO newUser) {
         User user = new User();
         user.setEmail(newUser.getEmail());
         user.setUsername(newUser.getUsername());
         user.setPassword(passwordEncoder.encode(newUser.getPassword()));
         var userExisted = usersRepository.findByEmail(user.getEmail());
-        return userExisted.orElseGet(() -> usersRepository.save(user));
+        var userRegistered= userExisted.orElseGet(() -> usersRepository.save(user));
+        String jti = UUID.randomUUID().toString();
+        TokensResponse tokensResponse= jwt.generateTokens(userRegistered,jti);
+        refreshTokenServices.createRefreshToken(userRegistered, tokensResponse.getRefreshToken(),jti);
+        AuthResponse authResponse= new AuthResponse();
+        authResponse.setTokensResponse(tokensResponse);
+        authResponse.setUser(user);
+        return authResponse;
     }
-    public TokensResponse login(@NotNull LoginDTO loginUser) {
-        User userlogin = usersRepository.findByEmail(loginUser.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+    public AuthResponse login(@NotNull LoginDTO loginUser) {
+        User userLogin = usersRepository.findByEmail(loginUser.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         try {
-            if (!passwordEncoder.matches(loginUser.getPassword(), userlogin.getPassword())) {
+            if (!passwordEncoder.matches(loginUser.getPassword(), userLogin.getPassword())) {
                 throw new BadCredentialsException("Wrong password");
             }
-
             String jti = UUID.randomUUID().toString();
-            TokensResponse tokensResponse= jwt.generateTokens(userlogin,jti);
-            refreshTokenServices.createRefreshToken(userlogin, tokensResponse.getRefreshToken(),jti);
-            return tokensResponse;
+            TokensResponse tokensResponse= jwt.generateTokens(userLogin,jti);
+            refreshTokenServices.createRefreshToken(userLogin, tokensResponse.getRefreshToken(),jti);
+            AuthResponse authResponse = new AuthResponse();
+            authResponse.setTokensResponse(tokensResponse);
+            authResponse.setUser(userLogin);
+            return authResponse;
         }catch (BadCredentialsException e) {
             throw  new BadCredentialsException("Invalid username or password");
         }
     }
 }
-

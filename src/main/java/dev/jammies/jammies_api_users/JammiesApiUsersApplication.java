@@ -1,5 +1,6 @@
 package dev.jammies.jammies_api_users;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,8 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class JammiesApiUsersApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(JammiesApiUsersApplication.class, args);
-        
-    }
 
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+                dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
+                System.setProperty("DATABASE_URL", dotenv.get("DATABASE_URL"));
+        SpringApplication.run(JammiesApiUsersApplication.class, args);
+
+    }
 }
