@@ -5,6 +5,7 @@ import dev.jammies.jammies_api_users.tracks.Track;
 import dev.jammies.jammies_api_users.tracks.TrackRepository;
 import dev.jammies.jammies_api_users.users.User;
 import dev.jammies.jammies_api_users.users.UserResponseDto;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,12 +15,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.DateTimeException;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+@CrossOrigin(origins =  "http://localhost:4321")
 @RestController
 @RequestMapping("api/post")
+
 public class PostControllers {
     private final PostRepository postRepository;
     private final TrackRepository trackRepository;
@@ -29,9 +30,8 @@ public class PostControllers {
         this.trackRepository = trackRepository;
     }
 
-    @CrossOrigin(origins =  "http://localhost:4321")
     @GetMapping()
-    public ResponseEntity<List<Post>> getPosts(
+    public ResponseEntity<List<PostResponseDto>> getPosts(
                @RequestParam(required = false)String cursor,
                 @RequestParam(defaultValue = "10") int limit
     ) {
@@ -43,52 +43,73 @@ public class PostControllers {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-
         Pageable pageable = PageRequest.of(0, limit);
         List<Post> posts = postRepository.findAll(pageable).getContent();
-        return  ResponseEntity.ok(posts);
+        List<PostResponseDto>  postResponseDtos = new ArrayList<>();
+
+        for (Post post : posts) {
+            UserResponseDto userDto = new UserResponseDto();
+            userDto.setId(post.getUser().getId());
+            userDto.setUsername(post.getUser().getUsername());
+            userDto.setEmail(post.getUser().getEmail());
+            if(post.getTrack()!= null) {
+                Track track = trackRepository.findById(post.getTrack().getId()).orElse(null);
+              PostResponseDto dto = new PostResponseDto(post.getId(),post.getType(),post.getContent(),userDto,post.getCreatedAt());
+              postResponseDtos.add(dto);
+            }else{
+                PostResponseDto dto = new PostResponseDto(post.getId(),post.getType(),post.getContent(),userDto,post.getCreatedAt());
+               postResponseDtos.add(dto);
+            }
+
+        }
+        return  ResponseEntity.ok(postResponseDtos);
     }
 
-    @CrossOrigin(origins =  "http://localhost:4321")
+
+
     @PostMapping
     public ResponseEntity<PostResponseDto> createPost(@RequestBody PostDto post, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
           Post newPost = new Post();
-
-        if(post.getTrack_id() != null){
+        if(Objects.equals(post.getType(), "track")){
             Track track = trackRepository.findById(post.getTrack_id()).orElse(null);
-                newPost.setTrack(track);
+            newPost.setTrack(track);
         }
+        newPost.setType(post.getType());
         newPost.setContent(post.getContent());
         newPost.setUser(user);
         Post savedPost = postRepository.save(newPost);
 
+        PostResponseDto dto = getPostResponseDto(post, savedPost);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @NotNull
+    private static PostResponseDto getPostResponseDto(PostDto post, Post savedPost) {
         UserResponseDto userDto = new UserResponseDto();
-        userDto.setId(savedPost.getId());
+        userDto.setId(savedPost.getUser().getId());
         userDto.setUsername(savedPost.getUser().getUsername());
         userDto.setEmail(savedPost.getUser().getEmail());
 
         PostResponseDto dto;
         if(savedPost.getTrack() != null){
-            dto = new PostResponseDto(savedPost.getId(), post.getContent(), userDto, savedPost.getTrack().getId(), savedPost.getCreatedAt());
+            dto = new PostResponseDto(savedPost.getId(),post.getType(), post.getContent(), userDto, savedPost.getTrack().getId(), savedPost.getCreatedAt());
         }else{
-            dto = new PostResponseDto(savedPost.getId(), post.getContent(), userDto, savedPost.getCreatedAt());
+            dto = new PostResponseDto(savedPost.getId(),post.getType(), post.getContent(), userDto, savedPost.getCreatedAt());
         }
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+        return dto;
     }
-    @CrossOrigin(origins =  "http://localhost:4321")
+
     @PutMapping
     public ResponseEntity<Post> updatePost(Post post) {
         return  new ResponseEntity<>(postRepository.save(post), HttpStatus.OK);
     }
 
-    @CrossOrigin(origins =  "http://localhost:4321")
     @DeleteMapping
     public ResponseEntity<Boolean> deletePost(Post post) {
         postRepository.delete(post);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    @CrossOrigin(origins = "http://localhost:4321")
     @GetMapping("{id}")
     public ResponseEntity<PostResponseDto> getPostById(UUID id) {
 
@@ -102,12 +123,11 @@ public class PostControllers {
         user.setEmail(post.getUser().getEmail());
         user.setId(post.getUser().getId());
 
-        PostResponseDto dto = new PostResponseDto(post.getId(),post.getContent(),user,post.getTrack().getId(),post.getCreatedAt());
+        PostResponseDto dto = new PostResponseDto(post.getId(),post.getType(),post.getContent(),user,post.getTrack().getId(),post.getCreatedAt());
 
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @CrossOrigin(origins =  "http://localhost:4321")
     @GetMapping("/user/{id}")
     public ResponseEntity<Optional<List<Post>>> getPostsbyUserId(UUID id) {
         Optional<List<Post>> posts = postRepository.findByUserId(id);

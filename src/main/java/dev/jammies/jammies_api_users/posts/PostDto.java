@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class PostDto {
+        private String type;
         private String content;
         private UUID track_id;
-
 }

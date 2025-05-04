@@ -12,24 +12,26 @@ import java.util.UUID;
 @Setter
 public class PostResponseDto {
     private UUID id;
+    private String type;
     private String content;
-    private UserResponseDto user;
+    private UserResponseDto posted_by;
     private UUID track_id;
     private Instant created_at;
 
-
-    public PostResponseDto(UUID id, String content, UserResponseDto user, UUID track_id, Instant created_at) {
+    public PostResponseDto(UUID id,String type ,String content, UserResponseDto posted_by, UUID track_id, Instant created_at) {
         this.id = id;
+        this.type = type;
         this.content = content;
-        this.user = user;
+        this.posted_by = posted_by;
         this.track_id = track_id;
         this.created_at = created_at;
     }
 
-    public PostResponseDto(UUID id, String content, UserResponseDto user, Instant created_at) {
+    public PostResponseDto(UUID id,String type, String content, UserResponseDto posted_by, Instant created_at) {
         this.id = id;
+        this.type = type;
         this.content = content;
-        this.user = user;
+        this.posted_by = posted_by;
         this.created_at = created_at;
     }
 }

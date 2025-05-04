@@ -20,6 +20,8 @@ public class Post implements Serializable {
     @Column(nullable = false, updatable = false)
     private UUID id;
 
+    @Column(nullable = false)
+    private String type;
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -30,6 +32,8 @@ public class Post implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "track_id")
     private Track track;
+
+
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

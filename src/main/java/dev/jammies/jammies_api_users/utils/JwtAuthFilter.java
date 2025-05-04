@@ -47,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-
+        
         boolean isPublic = PUBLIC_PATHS.stream()
             .anyMatch(p -> pathMatcher.match(p, path) && method.equals("GET") || path.contains("/api/auth/"));
 

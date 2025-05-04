@@ -9,9 +9,9 @@ import java.util.UUID;
 @Setter
 public class UserResponseDto {
     private UUID id;
-    private String name;
     private String username;
     private String email;
-    
+    private String avatar_url;
+
 }
 
