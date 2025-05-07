@@ -11,8 +11,6 @@ public class JammiesApiUsersApplication {
 
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
                 dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
-                System.setProperty("DATABASE_URL", dotenv.get("DATABASE_URL"));
         SpringApplication.run(JammiesApiUsersApplication.class, args);
-
     }
 }
