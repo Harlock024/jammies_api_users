@@ -2,12 +2,9 @@ package dev.jammies.jammies_api_users.tracks;
 
 import dev.jammies.jammies_api_users.users.User;
 import dev.jammies.jammies_api_users.utils.CloudinaryService;
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 public class TrackServices {
@@ -22,30 +19,69 @@ public class TrackServices {
     }
 
     public TrackResponse uploadTrack(UploadTrackRequest track, User user) throws IOException {
+        try {
+            if (track == null || track.getAudio() == null || track.getCover() == null) {
+                throw new IllegalArgumentException("Track audio or cover cannot be null");
+            }
 
-        Track newTrack = new Track();
+            Track newTrack = new Track();
+            newTrack.setTitle(track.getTitle());
+            newTrack.setUser(user);
 
-        newTrack.setTitle(track.getTitle());
-        newTrack.setUser(user);
+            var trackAudioResult = cloudinaryServices.upload(track.getAudio(), "jammies_track", "video");
+            if (trackAudioResult == null || !trackAudioResult.containsKey("secure_url")) {
+                throw new IOException("Failed to upload track audio to Cloudinary");
+            }
 
-        Map trackAudioResult = cloudinaryServices.upload(track.getAudio(), "jammies_track", "video");
-        newTrack.setAudio_url(trackAudioResult.get("secure_url").toString());
 
-        Map trackCoverResult = cloudinaryServices.upload(track.getCover(), "jammies_track/cover", "image");
+            newTrack.setAudio_url(trackAudioResult.get("secure_url").toString());
 
-        newTrack.setCover_image(trackCoverResult.get("secure_url").toString());
-        Track savedTrack = trackRepository.save(newTrack);
+            newTrack.setDuration(trackAudioResult.get("duration").toString());
 
-        return new TrackResponse(
-                savedTrack.getId(),
-                savedTrack.getTitle(),
-                savedTrack.getAudio_url(),
-                "0:0",
-                savedTrack.getUser().getName(),
-                savedTrack.getTitle(),
-                savedTrack.getCover_image()
-        );
+            var trackCoverResult = cloudinaryServices.upload(track.getCover(), "jammies_track/cover", "image");
+            if (trackCoverResult == null || !trackCoverResult.containsKey("secure_url")) {
+                throw new IOException("Failed to upload track cover to Cloudinary");
+            }
+            newTrack.setCover_image(trackCoverResult.get("secure_url").toString());
 
+            Track savedTrack = trackRepository.save(newTrack);
+
+
+            return new TrackResponse(
+                    savedTrack.getId(),
+                    savedTrack.getTitle(),
+                    savedTrack.getAudio_url(),
+                    formatDurationToMinutes(savedTrack.getDuration()),
+                    savedTrack.getUser().getName(),
+                    savedTrack.getTitle(),
+                    savedTrack.getCover_image()
+            );
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Error with track data: " + e.getMessage(), e);
+        } catch (IOException e) {
+
+            throw new IOException("Error uploading track data: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred: " + e.getMessage(), e);
+        }
     }
+
+    public String formatDurationToMinutes(String durationInString) {
+        try {
+
+            double durationInSeconds = Double.parseDouble(durationInString);
+
+
+            int minutes = (int) durationInSeconds / 60;
+            int seconds = (int) durationInSeconds % 60;
+
+
+            return String.format("%d:%02d", minutes, seconds);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return "00:00";
+        }
+    }
+
 
 }
