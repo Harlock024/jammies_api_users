@@ -1,6 +1,7 @@
 package dev.jammies.jammies_api_users.tracks;
 
 import dev.jammies.jammies_api_users.users.User;
+import dev.jammies.jammies_api_users.users.UserServices;
 import dev.jammies.jammies_api_users.utils.CloudinaryService;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,6 @@ public class TrackServices {
     public TrackServices(TrackRepository trackRepository, CloudinaryService cloudinaryServices) {
         this.trackRepository = trackRepository;
         this.cloudinaryServices = cloudinaryServices;
-
     }
 
     public TrackResponse uploadTrack(UploadTrackRequest track, User user) throws IOException {
@@ -47,12 +47,14 @@ public class TrackServices {
             Track savedTrack = trackRepository.save(newTrack);
 
 
+
+
             return new TrackResponse(
                     savedTrack.getId(),
                     savedTrack.getTitle(),
                     savedTrack.getAudio_url(),
                     formatDurationToMinutes(savedTrack.getDuration()),
-                    savedTrack.getUser().getName(),
+                    savedTrack.getUser().getUsername(),
                     savedTrack.getTitle(),
                     savedTrack.getCover_image()
             );
@@ -82,6 +84,4 @@ public class TrackServices {
             return "00:00";
         }
     }
-
-
 }
