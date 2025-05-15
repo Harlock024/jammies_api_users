@@ -32,11 +32,10 @@ public class TrackServices {
             if (trackAudioResult == null || !trackAudioResult.containsKey("secure_url")) {
                 throw new IOException("Failed to upload track audio to Cloudinary");
             }
-
-
+            
             newTrack.setAudio_url(trackAudioResult.get("secure_url").toString());
 
-            newTrack.setDuration(trackAudioResult.get("duration").toString());
+            newTrack.setDuration((Double) trackAudioResult.get("duration"));
 
             var trackCoverResult = cloudinaryServices.upload(track.getCover(), "jammies_track/cover", "image");
             if (trackCoverResult == null || !trackCoverResult.containsKey("secure_url")) {
@@ -53,7 +52,7 @@ public class TrackServices {
                     savedTrack.getId(),
                     savedTrack.getTitle(),
                     savedTrack.getAudio_url(),
-                    formatDurationToMinutes(savedTrack.getDuration()),
+                    savedTrack.getDuration(),
                     savedTrack.getUser().getUsername(),
                     savedTrack.getTitle(),
                     savedTrack.getCover_image()
@@ -68,20 +67,5 @@ public class TrackServices {
         }
     }
 
-    public String formatDurationToMinutes(String durationInString) {
-        try {
 
-            double durationInSeconds = Double.parseDouble(durationInString);
-
-
-            int minutes = (int) durationInSeconds / 60;
-            int seconds = (int) durationInSeconds % 60;
-
-
-            return String.format("%d:%02d", minutes, seconds);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return "00:00";
-        }
-    }
 }

@@ -36,7 +36,7 @@ public class Track implements Serializable {
     private String audio_url;
 
     @Column(nullable = false)
-    private String duration;
+    private Double duration;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

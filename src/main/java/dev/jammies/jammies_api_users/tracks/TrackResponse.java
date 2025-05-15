@@ -12,7 +12,7 @@ public class TrackResponse {
     public UUID id ;
     public String title;
     public String audio_url;
-    public String duration;
+    public Double duration;
     public String artist;
     public String album;
     public String cover_url;
@@ -21,7 +21,7 @@ public class TrackResponse {
         UUID id,
         String title,
         String audio_url,
-        String duration,
+        Double duration,
         String artist,
         String album,
         String cover_url
