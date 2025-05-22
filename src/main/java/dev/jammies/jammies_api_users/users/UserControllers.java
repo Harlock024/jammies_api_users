@@ -16,15 +16,15 @@ import java.util.UUID;
 @RequestMapping("/api/user")
 public class UserControllers {
 
-    private  final  UsersRepository userRepository;
-    public UserControllers(UsersRepository userRepository) {
-        this.userRepository = userRepository;
+    private  final  UserServices userServices;
+
+    public UserControllers(UserServices userServices) {
+        this.userServices = userServices;
     }
 
-    @CrossOrigin(origins =  "http://localhost:4321")
     @GetMapping()
-    public ResponseEntity<User> getCurrentUser(Authentication authentication ) {
+    public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication ) {
         User user = (User) authentication.getPrincipal();
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(userServices.userResponseDto(user), HttpStatus.OK);
     }
 }

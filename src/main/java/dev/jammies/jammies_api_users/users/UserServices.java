@@ -31,4 +31,7 @@ public class UserServices implements UserDetailsService {
         return  usersRepository.findById(id).orElseThrow();
     }
 
+    public UserResponseDto userResponseDto(User user) {
+        return new UserResponseDto(user.getId(), user.getUsername(), user.getEmail(), user.getProfile_picture(),user.getBio());
+    }
 }

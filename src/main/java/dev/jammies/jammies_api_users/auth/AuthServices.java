@@ -1,8 +1,8 @@
 package dev.jammies.jammies_api_users.auth;
 
-import dev.jammies.jammies_api_users.RefreshToken.RefreshToken;
 import dev.jammies.jammies_api_users.RefreshToken.RefreshTokenServices;
 import dev.jammies.jammies_api_users.RefreshToken.TokensResponse;
+import dev.jammies.jammies_api_users.users.UserServices;
 import dev.jammies.jammies_api_users.users.UsersRepository;
 import dev.jammies.jammies_api_users.users.User;
 import dev.jammies.jammies_api_users.users.UserDTO;
@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,13 +24,15 @@ public class AuthServices {
 
     private final RefreshTokenServices refreshTokenServices;
     private final Jwt jwt;
+    private final UserServices userServices;
 
 
-    public AuthServices(UsersRepository usersRepository, PasswordEncoder passwordEncoder , RefreshTokenServices refreshTokenServices, Jwt jwt) {
+    public AuthServices(UsersRepository usersRepository, PasswordEncoder passwordEncoder , RefreshTokenServices refreshTokenServices, Jwt jwt, UserServices userServices) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenServices = refreshTokenServices;
         this.jwt = jwt;
+        this.userServices = userServices;
     }
 
     public AuthResponse signup(@NotNull UserDTO newUser) {
@@ -46,7 +47,7 @@ public class AuthServices {
         refreshTokenServices.createRefreshToken(userRegistered, tokensResponse.getRefreshToken(),jti);
         AuthResponse authResponse= new AuthResponse();
         authResponse.setTokensResponse(tokensResponse);
-        authResponse.setUser(user);
+        authResponse.setUser(userServices.userResponseDto(userRegistered));
         return authResponse;
     }
     public AuthResponse login(@NotNull LoginDTO loginUser) {
@@ -60,7 +61,7 @@ public class AuthServices {
             refreshTokenServices.createRefreshToken(userLogin, tokensResponse.getRefreshToken(),jti);
             AuthResponse authResponse = new AuthResponse();
             authResponse.setTokensResponse(tokensResponse);
-            authResponse.setUser(userLogin);
+            authResponse.setUser(userServices.userResponseDto(userLogin));
             return authResponse;
         }catch (BadCredentialsException e) {
             throw  new BadCredentialsException("Invalid username or password");

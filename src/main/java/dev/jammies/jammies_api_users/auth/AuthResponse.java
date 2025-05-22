@@ -2,6 +2,7 @@ package dev.jammies.jammies_api_users.auth;
 
 import dev.jammies.jammies_api_users.RefreshToken.TokensResponse;
 import dev.jammies.jammies_api_users.users.User;
+import dev.jammies.jammies_api_users.users.UserResponseDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class AuthResponse {
     public TokensResponse tokensResponse;
-    public User user;
+    public UserResponseDto user;
 
 
 
