@@ -6,6 +6,7 @@ import dev.jammies.jammies_api_users.utils.CloudinaryService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class TrackServices {
@@ -17,6 +18,8 @@ public class TrackServices {
         this.trackRepository = trackRepository;
         this.cloudinaryServices = cloudinaryServices;
     }
+
+
 
     public TrackResponse uploadTrack(UploadTrackRequest track, User user) throws IOException {
         try {
@@ -65,6 +68,24 @@ public class TrackServices {
         } catch (Exception e) {
             throw new RuntimeException("An unexpected error occurred: " + e.getMessage(), e);
         }
+    }
+
+
+    public List<TrackResponse> getTrackList() {
+        List<Track> tracks = trackRepository.findAll();
+        return tracks.stream().map(this::converToDto).toList();
+    };
+
+    public  TrackResponse converToDto(Track track){
+        return new TrackResponse(
+                track.getId(),
+                track.getTitle(),
+                track.getAudio_url(),
+                track.getDuration(),
+                track.getUser().getUsername(),
+                track.getTitle(),
+                track.getCover_image()
+        );
     }
 
 
