@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TrackServices {
@@ -75,6 +76,11 @@ public class TrackServices {
         List<Track> tracks = trackRepository.findAll();
         return tracks.stream().map(this::converToDto).toList();
     };
+
+    public TrackResponse getTrack(UUID id){
+        return converToDto(trackRepository.findById(id).get());
+    }
+
 
     public  TrackResponse converToDto(Track track){
         return new TrackResponse(

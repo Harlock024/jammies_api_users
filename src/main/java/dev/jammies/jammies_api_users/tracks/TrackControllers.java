@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/track")
@@ -29,13 +30,11 @@ public class TrackControllers {
         return new ResponseEntity<>(tracks, HttpStatus.OK);
     }
 
+      @GetMapping("/{track_id}")
+    public ResponseEntity<TrackResponse> getTrack(@PathVariable UUID track_id) {
+        return new ResponseEntity<>(trackServices.getTrack(track_id), HttpStatus.OK);
+    }
 
-//    @CrossOrigin(origins =  "http://localhost:4321")
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Track> getTrack(@PathVariable UUID id){
-//        Track track = trackRepository.findById(id).orElse(null);
-//        return new ResponseEntity<>(track, HttpStatus.OK);
-//    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TrackResponse> createTrack(
@@ -46,6 +45,8 @@ public class TrackControllers {
         TrackResponse newTrack = trackServices.uploadTrack(track, user);
         return new ResponseEntity<>(newTrack, HttpStatus.CREATED);
     }
+
+
 
 //
 //    @PutMapping
