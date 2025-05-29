@@ -1,7 +1,6 @@
 package dev.jammies.jammies_api_users.tracks;
 
 import dev.jammies.jammies_api_users.users.User;
-import dev.jammies.jammies_api_users.users.UserServices;
 import dev.jammies.jammies_api_users.utils.CloudinaryService;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ public class TrackServices {
     }
 
 
-
     public TrackResponse uploadTrack(UploadTrackRequest track, User user) throws IOException {
         try {
             if (track == null || track.getAudio() == null || track.getCover() == null) {
@@ -36,7 +34,7 @@ public class TrackServices {
             if (trackAudioResult == null || !trackAudioResult.containsKey("secure_url")) {
                 throw new IOException("Failed to upload track audio to Cloudinary");
             }
-            
+
             newTrack.setAudio_url(trackAudioResult.get("secure_url").toString());
 
             newTrack.setDuration((Double) trackAudioResult.get("duration"));
@@ -50,12 +48,9 @@ public class TrackServices {
             Track savedTrack = trackRepository.save(newTrack);
 
 
-
-
             return new TrackResponse(
                     savedTrack.getId(),
                     savedTrack.getTitle(),
-                    savedTrack.getAudio_url(),
                     savedTrack.getDuration(),
                     savedTrack.getUser().getUsername(),
                     savedTrack.getTitle(),
@@ -74,19 +69,20 @@ public class TrackServices {
 
     public List<TrackResponse> getTrackList() {
         List<Track> tracks = trackRepository.findAll();
-        return tracks.stream().map(this::converToDto).toList();
-    };
+        return tracks.stream().map(this::converTrackToDto).toList();
+    }
 
-    public TrackResponse getTrack(UUID id){
-        return converToDto(trackRepository.findById(id).get());
+    ;
+
+    public TrackResponse getTrack(UUID id) {
+        return converTrackToDto(trackRepository.findById(id).get());
     }
 
 
-    public  TrackResponse converToDto(Track track){
+    public TrackResponse converTrackToDto(Track track) {
         return new TrackResponse(
                 track.getId(),
                 track.getTitle(),
-                track.getAudio_url(),
                 track.getDuration(),
                 track.getUser().getUsername(),
                 track.getTitle(),
