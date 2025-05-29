@@ -129,8 +129,12 @@ public class PlaylistService {
             playlist.getName(),
             playlist.getDescription(),
             playlist.getUser() != null
-                ? playlist.getUser().getUsername()
+                ? playlist.getUser().getId()
                 : null,
+
+            playlist.getUser() !=null
+                ? playlist.getUser().getUsername()
+                    : null,
             playlist.getCover_url()
         );
     }
@@ -189,7 +193,6 @@ public class PlaylistService {
 
     public TrackResponse converTrackToDto(Track track) {
         return new TrackResponse(
-
             track.getId(),
             track.getTitle(),
             track.getDuration(),
@@ -199,4 +202,3 @@ public class PlaylistService {
         );
     }
 }
-
