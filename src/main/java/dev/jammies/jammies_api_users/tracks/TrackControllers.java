@@ -30,7 +30,7 @@ public class TrackControllers {
         return new ResponseEntity<>(tracks, HttpStatus.OK);
     }
 
-      @GetMapping("/{track_id}")
+    @GetMapping("/{track_id}")
     public ResponseEntity<TrackResponse> getTrack(@PathVariable UUID track_id) {
         return new ResponseEntity<>(trackServices.getTrack(track_id), HttpStatus.OK);
     }
@@ -45,9 +45,6 @@ public class TrackControllers {
         TrackResponse newTrack = trackServices.uploadTrack(track, user);
         return new ResponseEntity<>(newTrack, HttpStatus.CREATED);
     }
-
-
-
 //
 //    @PutMapping
 //    public ResponseEntity<Track> updateTrack(@RequestBody Track track){

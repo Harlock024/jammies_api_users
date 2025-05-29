@@ -11,16 +11,14 @@ public class TrackResponse {
 
     public UUID id ;
     public String title;
-    public String audio_url;
     public Double duration;
-    public String artist;
+    public String posted_by;
     public String album;
     public String cover_url;
 
     public TrackResponse(
         UUID id,
         String title,
-        String audio_url,
         Double duration,
         String artist,
         String album,
@@ -28,9 +26,8 @@ public class TrackResponse {
     ) {
         this.id = id;
         this.title = title;
-        this.audio_url = audio_url;
         this.duration = duration;
-        this.artist = artist;
+        this.posted_by = artist;
         this.album = album;
         this.cover_url = cover_url;
     }

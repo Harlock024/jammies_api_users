@@ -24,9 +24,5 @@ public class UserResponseDto {
         this.avatar_url = avatar_url;
         this.bio = bio;
     }
-
-
-
-
 }
 

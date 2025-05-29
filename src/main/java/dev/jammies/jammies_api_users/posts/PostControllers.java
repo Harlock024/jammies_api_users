@@ -35,7 +35,7 @@ public class PostControllers {
         return postServices.listPosts() != null ? new ResponseEntity<>(postServices.listPosts(), HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<PostResponseDto> createPost(@RequestBody PostDto post, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         if (post.getType().equals("track")) {
@@ -47,6 +47,7 @@ public class PostControllers {
         }
         return new ResponseEntity<>(postServices.createPost(post, user), HttpStatus.CREATED);
     }
+
     @NotNull
     private static PostResponseDto getPostResponseDto(PostDto post, Post savedPost) {
         UserResponseDto userDto = new UserResponseDto();
@@ -62,6 +63,7 @@ public class PostControllers {
         }
         return dto;
     }
+
     @PutMapping
     public ResponseEntity<Post> updatePost(Post post, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
