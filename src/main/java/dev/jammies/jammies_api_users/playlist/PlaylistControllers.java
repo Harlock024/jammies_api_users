@@ -38,7 +38,7 @@ public class PlaylistControllers {
     ) {
         User user = (User) authentication.getPrincipal();
         return new ResponseEntity<>(
-            playlistService.getUserPlaylists(user.getId()),
+            playlistService.getUserPlaylists(user),
             HttpStatus.OK
         );
     }

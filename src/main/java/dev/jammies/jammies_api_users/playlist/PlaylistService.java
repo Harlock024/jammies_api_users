@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import dev.jammies.jammies_api_users.utils.CloudinaryService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
@@ -52,7 +53,7 @@ public class PlaylistService {
 
     public List<PlaylistResponseDto> getUserPlaylists(User user) {
         return playlistsRepository
-            .findAllByUser(user)
+            .findAll()
             .stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());
