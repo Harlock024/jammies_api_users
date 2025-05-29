@@ -5,15 +5,17 @@ import dev.jammies.jammies_api_users.tracks.TrackRepository;
 import dev.jammies.jammies_api_users.tracks.TrackResponse;
 import dev.jammies.jammies_api_users.tracks.TrackServices;
 import dev.jammies.jammies_api_users.users.User;
-import dev.jammies.jammies_api_users.utils.CloudinaryService;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
+
 
 @Service
 public class PlaylistService {
@@ -31,6 +33,7 @@ public class PlaylistService {
         TrackServices trackServices,
         ContentNegotiatingViewResolver contentNegotiatingViewResolver
     ) {
+
         this.playlistsRepository = playlistsRepository;
         this.cloudinaryService = cloudinaryService;
         this.trackRepository = trackRepository;
@@ -39,6 +42,7 @@ public class PlaylistService {
     }
 
     public List<PlaylistResponseDto> getAllPlaylists() {
+
         return playlistsRepository
             .findAll()
             .stream()
@@ -60,6 +64,7 @@ public class PlaylistService {
             .map(this::convertToDto)
             .orElseThrow(() -> new NoSuchElementException("Playlist not found")
             );
+
     }
 
     public PlaylistResponseDto createPlaylist(String name, User user) {
@@ -79,6 +84,7 @@ public class PlaylistService {
             .orElseThrow(() -> new NoSuchElementException("Playlist not found")
             );
 
+
         if (playlistRequestDto.getName() != null) {
             playlist.setName(playlistRequestDto.getName());
         }
@@ -88,11 +94,13 @@ public class PlaylistService {
         }
 
         if (playlistRequestDto.getCover() != null) {
+
             var coverResult = cloudinaryService.upload(
                 playlistRequestDto.getCover(),
                 "jammies_track/playlist/cover",
                 "image"
             );
+
             if (coverResult == null) {
                 throw new IOException("Failed to upload cover");
             }
@@ -103,6 +111,8 @@ public class PlaylistService {
         return convertToDto(playlist);
     }
 
+
+
     public boolean deletePlaylist(UUID id) {
         if (!playlistsRepository.existsById(id)) {
             throw new NoSuchElementException("Playlist not found");
@@ -112,6 +122,7 @@ public class PlaylistService {
     }
 
     public PlaylistResponseDto convertToDto(@NotNull Playlist playlist) {
+
         return new PlaylistResponseDto(
             playlist.getId(),
             playlist.getName(),
@@ -138,12 +149,14 @@ public class PlaylistService {
             .findById(trackId)
             .orElseThrow(() -> new NoSuchElementException("Track not found"));
 
+
         playlist.getTracks().add(track);
         playlistsRepository.save(playlist);
         return convertToDto(playlist);
     }
 
     public List<TrackResponse> getTracksInPlaylist(UUID playlistId) {
+
         Playlist playlist = playlistsRepository
             .findById(playlistId)
             .orElseThrow(() -> new NoSuchElementException("Playlist not found")
@@ -166,6 +179,7 @@ public class PlaylistService {
             .findById(trackId)
             .orElseThrow(() -> new NoSuchElementException("Track not found"));
 
+
         playlist.getTracks().remove(Track);
         playlistsRepository.save(playlist);
 
@@ -174,6 +188,7 @@ public class PlaylistService {
 
     public TrackResponse converTrackToDto(Track track) {
         return new TrackResponse(
+
             track.getId(),
             track.getTitle(),
             track.getDuration(),
@@ -183,3 +198,4 @@ public class PlaylistService {
         );
     }
 }
+
