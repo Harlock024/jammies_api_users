@@ -3,7 +3,6 @@ package dev.jammies.jammies_api_users.playlist;
 import dev.jammies.jammies_api_users.tracks.Track;
 import dev.jammies.jammies_api_users.tracks.TrackRepository;
 import dev.jammies.jammies_api_users.tracks.TrackResponse;
-import dev.jammies.jammies_api_users.tracks.TrackServices;
 import dev.jammies.jammies_api_users.users.User;
 
 import java.io.IOException;
@@ -15,8 +14,6 @@ import java.util.stream.Collectors;
 import dev.jammies.jammies_api_users.utils.CloudinaryService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
-
 
 @Service
 public class PlaylistService {
@@ -24,22 +21,17 @@ public class PlaylistService {
     private final PlaylistsRepository playlistsRepository;
     private final CloudinaryService cloudinaryService;
     private final TrackRepository trackRepository;
-    private final TrackServices trackServices;
-    private final ContentNegotiatingViewResolver contentNegotiatingViewResolver;
 
     public PlaylistService(
         PlaylistsRepository playlistsRepository,
         CloudinaryService cloudinaryService,
-        TrackRepository trackRepository,
-        TrackServices trackServices,
-        ContentNegotiatingViewResolver contentNegotiatingViewResolver
+        TrackRepository trackRepository
     ) {
 
         this.playlistsRepository = playlistsRepository;
         this.cloudinaryService = cloudinaryService;
         this.trackRepository = trackRepository;
-        this.trackServices = trackServices;
-        this.contentNegotiatingViewResolver = contentNegotiatingViewResolver;
+
     }
 
     public List<PlaylistResponseDto> getAllPlaylists() {
@@ -53,7 +45,7 @@ public class PlaylistService {
 
     public List<PlaylistResponseDto> getUserPlaylists(User user) {
         return playlistsRepository
-            .findAll()
+            .findAllByUser(user)
             .stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());
@@ -128,6 +120,10 @@ public class PlaylistService {
             playlist.getId(),
             playlist.getName(),
             playlist.getDescription(),
+                 playlist.getUser() != null
+                ? playlist.getUser().getId()
+                : null,
+
             playlist.getUser() != null
                 ? playlist.getUser().getUsername()
                 : null,
