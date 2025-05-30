@@ -1,18 +1,18 @@
 package dev.jammies.jammies_api_users.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dev.jammies.jammies_api_users.FavoriteTracks.FavoriteTracks;
 import dev.jammies.jammies_api_users.RefreshToken.RefreshToken;
-import dev.jammies.jammies_api_users.auth.Token;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import jakarta.persistence.*;
-import java.io.Serializable;
-import java.util.*;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.*;
 
 @Setter
 @Getter
@@ -27,7 +27,7 @@ public class User implements UserDetails, Serializable {
 
     @Column(nullable = true)
     private String name;
-    
+
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -38,8 +38,6 @@ public class User implements UserDetails, Serializable {
 
     @Column(nullable = false)
     private String password;
-
-
 
 
     @Column(nullable = true)
@@ -54,7 +52,6 @@ public class User implements UserDetails, Serializable {
     private Date createdAt;
 
 
-
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Date updatedAt;
@@ -63,6 +60,9 @@ public class User implements UserDetails, Serializable {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<RefreshToken> refresh_token = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<FavoriteTracks> favorite_tracks;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
