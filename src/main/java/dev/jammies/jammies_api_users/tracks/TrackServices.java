@@ -1,8 +1,10 @@
 package dev.jammies.jammies_api_users.tracks;
 
 import dev.jammies.jammies_api_users.users.User;
+import dev.jammies.jammies_api_users.users.UserServices;
 import dev.jammies.jammies_api_users.utils.CloudinaryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +16,7 @@ public class TrackServices {
     private final TrackRepository trackRepository;
     private final CloudinaryService cloudinaryServices;
 
-    public TrackServices(TrackRepository trackRepository, CloudinaryService cloudinaryServices) {
+    public TrackServices(TrackRepository trackRepository, CloudinaryService cloudinaryServices, UserServices userServices) {
         this.trackRepository = trackRepository;
         this.cloudinaryServices = cloudinaryServices;
     }
@@ -47,15 +49,9 @@ public class TrackServices {
 
             Track savedTrack = trackRepository.save(newTrack);
 
+            return TrackResponseMapper.toResponse(savedTrack, user);
 
-            return new TrackResponse(
-                    savedTrack.getId(),
-                    savedTrack.getTitle(),
-                    savedTrack.getDuration(),
-                    savedTrack.getUser().getUsername(),
-                    savedTrack.getTitle(),
-                    savedTrack.getCover_image()
-            );
+
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Error with track data: " + e.getMessage(), e);
         } catch (IOException e) {
@@ -66,29 +62,15 @@ public class TrackServices {
         }
     }
 
-
-    public List<TrackResponse> getTrackList() {
+    @Transactional
+    public List<TrackResponse> getTrackList(User user) {
         List<Track> tracks = trackRepository.findAll();
-        return tracks.stream().map(this::converTrackToDto).toList();
+        return TrackResponseMapper.toResponseList(tracks, user);
     }
 
-    ;
-
-    public TrackResponse getTrack(UUID id) {
-        return converTrackToDto(trackRepository.findById(id).get());
+    @Transactional
+    public TrackResponse getTrack(UUID id, User user) {
+        Track track = trackRepository.findById(id).orElseThrow(() -> new RuntimeException("Track not found"));
+        return TrackResponseMapper.toResponse(track, user);
     }
-
-
-    public TrackResponse converTrackToDto(Track track) {
-        return new TrackResponse(
-                track.getId(),
-                track.getTitle(),
-                track.getDuration(),
-                track.getUser().getUsername(),
-                track.getTitle(),
-                track.getCover_image()
-        );
-    }
-
-
 }

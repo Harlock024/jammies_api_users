@@ -3,12 +3,12 @@ package dev.jammies.jammies_api_users.FavoriteTracks;
 import dev.jammies.jammies_api_users.tracks.Track;
 import dev.jammies.jammies_api_users.tracks.TrackRepository;
 import dev.jammies.jammies_api_users.tracks.TrackResponse;
+import dev.jammies.jammies_api_users.tracks.TrackResponseMapper;
 import dev.jammies.jammies_api_users.users.User;
 import dev.jammies.jammies_api_users.users.UsersRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,16 +25,11 @@ public class FavoriteTracksServices {
         this.usersRepository = usersRepository;
     }
 
-    public List<TrackResponse> getFavoriteTracksByUser(UUID user_id) {
-        List<Track> tracks = favoriteTracksRepository.findByUserId(user_id).stream()
+    public List<TrackResponse> getFavoriteTracksByUser(User user) {
+        List<Track> tracks = favoriteTracksRepository.findByUserId(user.getId()).stream()
                 .map(FavoriteTracks::getTrack)
                 .toList();
-        List<TrackResponse> trackResponses = new ArrayList<>();
-
-        for (Track track : tracks) {
-            trackResponses.add(converTrackToDto(track));
-        }
-        return trackResponses;
+        return TrackResponseMapper.toResponseList(tracks, user);
     }
 
     public TrackResponse addTrackToFavorite(User user, UUID trackId) {
@@ -51,20 +46,23 @@ public class FavoriteTracksServices {
         favoriteTracks.setUser(user);
         favoriteTracksRepository.save(favoriteTracks);
 
-        return converTrackToDto(track);
+        return converTrackToDto(track, true);
     }
 
 
-    public TrackResponse converTrackToDto(Track track) {
+    public TrackResponse converTrackToDto(Track track, Boolean favorite) {
         return new TrackResponse(
                 track.getId(),
                 track.getTitle(),
                 track.getDuration(),
                 track.getUser().getUsername(),
                 track.getTitle(),
-                track.getCover_image()
+                track.getCover_image(),
+                favorite
         );
     }
+
+
     @Transactional
     public void removeTrackFromFavorite(User user, UUID trackId) {
         Track track = trackRepository.findById(trackId)
