@@ -2,10 +2,12 @@ package dev.jammies.jammies_api_users.tracks;
 
 
 import dev.jammies.jammies_api_users.users.User;
+import dev.jammies.jammies_api_users.users.UsersRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -17,24 +19,37 @@ import java.util.UUID;
 public class TrackControllers {
 
     private final TrackServices trackServices;
+    private final UsersRepository usersRepository;
 
 
-    public TrackControllers(TrackServices trackServices) {
+    public TrackControllers(TrackServices trackServices, UsersRepository usersRepository) {
         this.trackServices = trackServices;
+        this.usersRepository = usersRepository;
     }
 
 
     @GetMapping
-    public ResponseEntity<List<TrackResponse>> getTracks() throws IOException {
-        List<TrackResponse> tracks = trackServices.getTrackList();
+    @Transactional
+    public ResponseEntity<List<TrackResponse>> getTracks(Authentication auth) throws IOException {
+        User user = (User) auth.getPrincipal();
+
+        User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<TrackResponse> tracks = trackServices.getTrackList(managedUser);
         return new ResponseEntity<>(tracks, HttpStatus.OK);
     }
 
-    @GetMapping("/{track_id}")
-    public ResponseEntity<TrackResponse> getTrack(@PathVariable UUID track_id) {
-        return new ResponseEntity<>(trackServices.getTrack(track_id), HttpStatus.OK);
-    }
 
+    @GetMapping("/{track_id}")
+    @Transactional
+    public ResponseEntity<TrackResponse> getTrack(@PathVariable UUID track_id, Authentication auth) {
+        User user = (User) auth.getPrincipal();
+
+        User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return new ResponseEntity<>(trackServices.getTrack(track_id, managedUser), HttpStatus.OK);
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TrackResponse> createTrack(
@@ -42,7 +57,10 @@ public class TrackControllers {
             Authentication authentication
     ) throws IOException {
         User user = (User) authentication.getPrincipal();
-        TrackResponse newTrack = trackServices.uploadTrack(track, user);
+
+        User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        TrackResponse newTrack = trackServices.uploadTrack(track, managedUser);
         return new ResponseEntity<>(newTrack, HttpStatus.CREATED);
     }
 //

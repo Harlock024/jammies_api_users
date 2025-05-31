@@ -25,7 +25,7 @@ public class FavoriteControllers {
     @GetMapping()
     public ResponseEntity<List<TrackResponse>> getFavoriteTracks(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return new ResponseEntity<>(favoriteTracksServices.getFavoriteTracksByUser(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(favoriteTracksServices.getFavoriteTracksByUser(user), HttpStatus.OK);
 
     }
 
