@@ -3,6 +3,7 @@ package dev.jammies.jammies_api_users.playlist;
 
 import dev.jammies.jammies_api_users.tracks.TrackResponse;
 import dev.jammies.jammies_api_users.users.User;
+import dev.jammies.jammies_api_users.users.UsersRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,11 @@ import java.util.UUID;
 public class PlaylistControllers {
 
     private final PlaylistService playlistService;
+    private final UsersRepository usersRepository;
 
-    public PlaylistControllers(PlaylistService playlistService) {
+    public PlaylistControllers(PlaylistService playlistService, UsersRepository usersRepository) {
         this.playlistService = playlistService;
+        this.usersRepository = usersRepository;
     }
 
 
@@ -36,9 +39,14 @@ public class PlaylistControllers {
     public ResponseEntity<List<PlaylistResponseDto>> getUserPlaylists(
             Authentication authentication
     ) {
+
         User user = (User) authentication.getPrincipal();
+
+        User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         return new ResponseEntity<>(
-                playlistService.getUserPlaylists(user),
+                playlistService.getUserPlaylists(managedUser),
                 HttpStatus.OK
         );
     }
@@ -49,10 +57,12 @@ public class PlaylistControllers {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
+         User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return new ResponseEntity<>(
                 playlistService.createPlaylist(
                         createPlaylistRequestDto.getName(),
-                        user
+                        managedUser
                 ),
                 HttpStatus.OK
         );
@@ -106,8 +116,10 @@ public class PlaylistControllers {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
+         User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return new ResponseEntity<>(
-                playlistService.getTracksInPlaylist(id, user),
+                playlistService.getTracksInPlaylist(id, managedUser),
                 HttpStatus.OK
         );
     }

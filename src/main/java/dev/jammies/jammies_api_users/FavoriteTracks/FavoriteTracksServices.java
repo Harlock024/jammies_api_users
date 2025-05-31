@@ -17,14 +17,13 @@ public class FavoriteTracksServices {
 
     private final FavoriteTracksRepository favoriteTracksRepository;
     private final TrackRepository trackRepository;
-    private final UsersRepository usersRepository;
 
-    public FavoriteTracksServices(FavoriteTracksRepository favoriteTracksRepository, TrackRepository trackRepository, UsersRepository usersRepository) {
+    public FavoriteTracksServices(FavoriteTracksRepository favoriteTracksRepository, TrackRepository trackRepository) {
         this.favoriteTracksRepository = favoriteTracksRepository;
         this.trackRepository = trackRepository;
-        this.usersRepository = usersRepository;
     }
 
+    @Transactional
     public List<TrackResponse> getFavoriteTracksByUser(User user) {
         List<Track> tracks = favoriteTracksRepository.findByUserId(user.getId()).stream()
                 .map(FavoriteTracks::getTrack)
@@ -32,6 +31,7 @@ public class FavoriteTracksServices {
         return TrackResponseMapper.toResponseList(tracks, user);
     }
 
+    @Transactional
     public TrackResponse addTrackToFavorite(User user, UUID trackId) {
         Track track = trackRepository.findById(trackId)
                 .orElseThrow(() -> new RuntimeException("Track not found"));
@@ -61,7 +61,6 @@ public class FavoriteTracksServices {
                 favorite
         );
     }
-
 
     @Transactional
     public void removeTrackFromFavorite(User user, UUID trackId) {
