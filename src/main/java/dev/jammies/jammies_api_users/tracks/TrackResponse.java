@@ -15,7 +15,8 @@ public class TrackResponse {
     public String posted_by;
     public String album;
     public String cover_url;
-    public boolean is_favorite;
+    public Boolean is_favorite;
+
 
     public TrackResponse(
         UUID id,
@@ -24,7 +25,9 @@ public class TrackResponse {
         String artist,
         String album,
         String cover_url,
-        boolean is_favorite
+
+        Boolean is_favorite
+
     ) {
         this.id = id;
         this.title = title;
