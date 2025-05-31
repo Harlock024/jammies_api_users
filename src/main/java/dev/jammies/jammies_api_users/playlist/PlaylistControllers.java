@@ -74,7 +74,7 @@ public class PlaylistControllers {
 
     }
 
-    @PutMapping(path = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(path = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PlaylistResponseDto> updatePlaylist(
 
             @RequestPart PlaylistRequestDto playlistRequestDto,
@@ -88,7 +88,7 @@ public class PlaylistControllers {
         );
     }
 
-    @DeleteMapping("{id}/")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> deletePlaylist(
             @PathVariable UUID id,
             Authentication authentication
