@@ -23,6 +23,7 @@ public class FavoriteTracksServices {
         this.trackRepository = trackRepository;
     }
 
+  
     @Transactional
     public List<TrackResponse> getFavoriteTracksByUser(User user) {
         List<Track> tracks = favoriteTracksRepository.findByUserId(user.getId()).stream()
@@ -61,7 +62,7 @@ public class FavoriteTracksServices {
                 favorite
         );
     }
-
+  
     @Transactional
     public void removeTrackFromFavorite(User user, UUID trackId) {
         Track track = trackRepository.findById(trackId)

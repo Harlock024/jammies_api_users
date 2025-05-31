@@ -35,6 +35,7 @@ public class FavoriteControllers {
 
         return new ResponseEntity<>(favoriteTracksServices.getFavoriteTracksByUser(managedUser), HttpStatus.OK);
 
+
     }
 
     @PostMapping()

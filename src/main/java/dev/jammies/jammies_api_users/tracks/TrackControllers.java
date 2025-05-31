@@ -30,7 +30,9 @@ public class TrackControllers {
 
     @GetMapping
     @Transactional
+
     public ResponseEntity<List<TrackResponse>> getTracks(Authentication auth){
+
         User user = (User) auth.getPrincipal();
 
         User managedUser = usersRepository.findById(user.getId())

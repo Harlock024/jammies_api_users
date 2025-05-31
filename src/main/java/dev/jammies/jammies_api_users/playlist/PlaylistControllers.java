@@ -4,6 +4,7 @@ package dev.jammies.jammies_api_users.playlist;
 import dev.jammies.jammies_api_users.tracks.TrackResponse;
 import dev.jammies.jammies_api_users.users.User;
 import dev.jammies.jammies_api_users.users.UsersRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class PlaylistControllers {
     private final UsersRepository usersRepository;
 
     public PlaylistControllers(PlaylistService playlistService, UsersRepository usersRepository) {
+
         this.playlistService = playlistService;
         this.usersRepository = usersRepository;
     }
@@ -46,7 +48,9 @@ public class PlaylistControllers {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         return new ResponseEntity<>(
+
                 playlistService.getUserPlaylists(managedUser),
+
                 HttpStatus.OK
         );
     }
@@ -62,6 +66,7 @@ public class PlaylistControllers {
         return new ResponseEntity<>(
                 playlistService.createPlaylist(
                         createPlaylistRequestDto.getName(),
+
                         managedUser
                 ),
                 HttpStatus.OK
@@ -119,7 +124,9 @@ public class PlaylistControllers {
          User managedUser = usersRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return new ResponseEntity<>(
+
                 playlistService.getTracksInPlaylist(id, managedUser),
+
                 HttpStatus.OK
         );
     }
