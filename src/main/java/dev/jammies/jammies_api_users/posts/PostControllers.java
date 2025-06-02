@@ -1,33 +1,30 @@
 package dev.jammies.jammies_api_users.posts;
 
 
-import dev.jammies.jammies_api_users.tracks.Track;
-import dev.jammies.jammies_api_users.tracks.TrackRepository;
 import dev.jammies.jammies_api_users.users.User;
-import dev.jammies.jammies_api_users.users.UserResponseDto;
-import org.jetbrains.annotations.NotNull;
+import dev.jammies.jammies_api_users.users.UsersRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:4321")
 @RestController
 @RequestMapping("api/post")
 
 public class PostControllers {
-    private final PostRepository postRepository;
-    private final TrackRepository trackRepository;
     private final PostServices postServices;
+    private final UsersRepository usersRepository;
 
-    public PostControllers(PostRepository postRepository, TrackRepository trackRepository, PostServices postServices) {
-        this.postRepository = postRepository;
-        this.trackRepository = trackRepository;
+    public PostControllers(PostServices postServices, UsersRepository usersRepository) {
         this.postServices = postServices;
+        this.usersRepository = usersRepository;
     }
 
     @GetMapping()
@@ -35,61 +32,41 @@ public class PostControllers {
         return postServices.listPosts() != null ? new ResponseEntity<>(postServices.listPosts(), HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping()
-    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostDto post, Authentication authentication) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<PostResponseDto> createPost(@ModelAttribute PostRequestDto post, Authentication authentication) throws IOException {
         User user = (User) authentication.getPrincipal();
-        if (post.getType().equals("track")) {
-            Track track = trackRepository.findById(post.getTrack_id()).orElse(null);
-            if (track != null) {
 
-
-            }
-        }
-        return new ResponseEntity<>(postServices.createPost(post, user), HttpStatus.CREATED);
+        User managedUser = usersRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return new ResponseEntity<>(postServices.createPost(post, managedUser), HttpStatus.CREATED);
     }
 
-    @NotNull
-    private static PostResponseDto getPostResponseDto(PostDto post, Post savedPost) {
-        UserResponseDto userDto = new UserResponseDto();
-        userDto.setId(savedPost.getUser().getId());
-        userDto.setUsername(savedPost.getUser().getUsername());
-        userDto.setEmail(savedPost.getUser().getEmail());
+//    @PutMapping
+//    public ResponseEntity<Post> updatePost(Post post, Authentication authentication) {
+//        User user = (User) authentication.getPrincipal();
+//        if (user == null || !post.getUser().getId().equals(user.getId())) {
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//        return new ResponseEntity<>(postServices.updatePost(), HttpStatus.OK);
+//    }
 
-        PostResponseDto dto;
-        if (savedPost.getTrack() != null) {
-            dto = new PostResponseDto(savedPost.getId(), post.getType(), post.getContent(), userDto, savedPost.getTrack().getId(), savedPost.getCreatedAt());
-        } else {
-            dto = new PostResponseDto(savedPost.getId(), post.getType(), post.getContent(), userDto, savedPost.getCreatedAt());
-        }
-        return dto;
-    }
+//    @DeleteMapping
+//    public ResponseEntity<Boolean> deletePost(Post post, Authentication authentication) {
+//        User user = (User) authentication.getPrincipal();
+//        if (user == null || !post.getUser().getId().equals(user.getId())) {
+//            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+//        }
+//        postRepository.delete(post);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 
-    @PutMapping
-    public ResponseEntity<Post> updatePost(Post post, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        if (user == null || !post.getUser().getId().equals(user.getId())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        return new ResponseEntity<>(postRepository.save(post), HttpStatus.OK);
-    }
-
-    @DeleteMapping
-    public ResponseEntity<Boolean> deletePost(Post post, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        if (user == null || !post.getUser().getId().equals(user.getId())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        postRepository.delete(post);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping("{id}")
-    public ResponseEntity<PostResponseDto> getPostById(UUID id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDto> getPostById(@PathVariable UUID id) {
         return new ResponseEntity<>(postServices.getPostById(id), HttpStatus.OK);
     }
 
-
-    @GetMapping("/user/")
+    @GetMapping("/user")
     public ResponseEntity<Optional<List<PostResponseDto>>> getPostsbyUserId(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         Optional<List<PostResponseDto>> posts = postServices.getPostByUser(user);

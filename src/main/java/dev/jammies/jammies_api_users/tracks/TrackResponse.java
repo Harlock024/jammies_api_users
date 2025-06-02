@@ -17,7 +17,6 @@ public class TrackResponse {
     public String cover_url;
     public Boolean is_favorite;
 
-
     public TrackResponse(
         UUID id,
         String title,

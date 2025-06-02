@@ -30,7 +30,6 @@ public class TrackControllers {
 
     @GetMapping
     @Transactional
-
     public ResponseEntity<List<TrackResponse>> getTracks(Authentication auth){
 
         User user = (User) auth.getPrincipal();
@@ -65,6 +64,7 @@ public class TrackControllers {
         TrackResponse newTrack = trackServices.uploadTrack(track, managedUser);
         return new ResponseEntity<>(newTrack, HttpStatus.CREATED);
     }
+
 //
 //    @PutMapping
 //    public ResponseEntity<Track> updateTrack(@RequestBody Track track){

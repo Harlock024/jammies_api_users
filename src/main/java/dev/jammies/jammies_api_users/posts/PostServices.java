@@ -1,11 +1,16 @@
 package dev.jammies.jammies_api_users.posts;
 
 import dev.jammies.jammies_api_users.tracks.Track;
+import dev.jammies.jammies_api_users.tracks.TrackRepository;
+import dev.jammies.jammies_api_users.tracks.TrackResponse;
+import dev.jammies.jammies_api_users.tracks.TrackResponseMapper;
 import dev.jammies.jammies_api_users.users.User;
 import dev.jammies.jammies_api_users.users.UserResponseDto;
+import dev.jammies.jammies_api_users.utils.CloudinaryService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,12 +19,18 @@ import java.util.UUID;
 @Service
 public class PostServices {
 
+
     private final PostRepository postRepository;
+    private final TrackRepository trackRepository;
+    private final CloudinaryService cloudinaryService;
 
-    public PostServices(PostRepository postRepository) {
+
+    public PostServices(PostRepository postRepository, CloudinaryService cloudinaryService, TrackRepository trackRepository) {
         this.postRepository = postRepository;
-    }
+        this.cloudinaryService = cloudinaryService;
 
+        this.trackRepository = trackRepository;
+    }
 
     public List<PostResponseDto> listPosts() {
         List<Post> posts = postRepository.findAll();
@@ -28,31 +39,36 @@ public class PostServices {
         for (Post post : posts) {
             postResponseDtos.add(convertToDto(post));
         }
-
         return postResponseDtos;
     }
 
-    public PostResponseDto createPostWithTrack(PostDto postDto, User user, Track track) {
-        Post post = new Post();
-        post.setId(UUID.randomUUID());
-        post.setCreatedAt(Instant.now());
-        post.setType(postDto.getType());
-        post.setContent(postDto.getContent());
-        post.setTrack(track);
-        post.setUser(user);
 
-        return convertToDto(postRepository.save(post));
+    @Transactional
+    public PostResponseDto createPost(PostRequestDto postDto, User user) throws IOException {
+        try {
+            Post post = new Post();
+            post.setUser(user);
+
+            if (postDto.getContent() != null) {
+                post.setContent(postDto.getContent());
+            }
+            if (postDto.getImage() != null) {
+                var postCoverResult = cloudinaryService.upload(postDto.getImage(), "jammies_track/post/images", "image");
+                if (postCoverResult == null || !postCoverResult.containsKey("secure_url")) {
+                    throw new IOException("Could not upload image to Cloudinary");
+                }
+                post.setImage(postCoverResult.get("secure_url").toString());
+            }
+            if (postDto.getTrack_id() != null) {
+                Optional<Track> track = trackRepository.findById(postDto.getTrack_id());
+                post.setTrack(track.orElse(null));
+            }
+            return convertToDto(postRepository.save(post));
+        } catch (Exception e) {
+            throw new IOException("Error creating post: " + e.getMessage(), e);
+        }
     }
 
-    public PostResponseDto createPost(PostDto postDto, User user) {
-        Post post = new Post();
-        post.setType(postDto.getType());
-        post.setContent(postDto.getContent());
-        post.setUser(user);
-        post.setCreatedAt(Instant.now());
-
-        return convertToDto(postRepository.save(post));
-    }
 
     public PostResponseDto getPostById(UUID id) {
         return postRepository.findById(id)
@@ -67,7 +83,6 @@ public class PostServices {
             return null;
         }
 
-        existingPost.setType(postDto.getType());
         existingPost.setContent(postDto.getContent());
 
         return convertToDto(postRepository.save(existingPost));
@@ -99,11 +114,18 @@ public class PostServices {
         userDto.setUsername(post.getUser().getUsername());
         userDto.setEmail(post.getUser().getEmail());
 
-        if (post.getTrack() != null) {
-            return new PostResponseDto(post.getId(), post.getType(), post.getContent(), userDto,
-                    post.getTrack().getId(), post.getCreatedAt());
-        }
+        PostResponseDto postResponseDto = new PostResponseDto();
+        postResponseDto.setId(post.getId());
+        postResponseDto.setPosted_by(userDto);
+        if (post.getContent() != null) postResponseDto.setContent(post.getContent());
 
-        return new PostResponseDto(post.getId(), post.getType(), post.getContent(), userDto, post.getCreatedAt());
+        if (post.getTrack() != null) {
+            TrackResponse track = TrackResponseMapper.toResponse(post.getTrack(), post.getUser());
+            postResponseDto.setTrack(track);
+        }
+        if (post.getImage() != null) {
+            postResponseDto.setImage(post.getImage());
+        }
+        return postResponseDto;
     }
 }
