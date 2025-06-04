@@ -1,13 +1,13 @@
 package dev.jammies.jammies_api_users.tracks;
 
 import dev.jammies.jammies_api_users.users.User;
-
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -28,10 +28,9 @@ public class Track implements Serializable {
 
     @Column
     private String lyrics;
-
     @Column(nullable = false)
     private String cover_image;
-    
+
     @Column(nullable = false)
     private String audio_url;
 
@@ -44,3 +43,4 @@ public class Track implements Serializable {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt = Instant.now();
 }
+
