@@ -47,4 +47,5 @@ public class DevicesControllers {
         devicesServices.removeDevices(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }
