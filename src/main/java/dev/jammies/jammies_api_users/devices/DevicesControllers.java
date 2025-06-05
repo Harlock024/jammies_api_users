@@ -42,9 +42,9 @@ public class DevicesControllers {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDevice(Authentication authentication, @PathVariable UUID deviceId) {
+    public ResponseEntity<Void> deleteDevice(Authentication authentication, @PathVariable UUID id) {
         User user = (User) authentication.getPrincipal();
-        devicesServices.removeDevices(deviceId, user);
+        devicesServices.removeDevices(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
